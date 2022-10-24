@@ -1,0 +1,55 @@
+#!/bin/bash
+
+if [[ "$EUID" -ne 0 ]]; then
+echo "Run script with root privileges."
+exit
+fi
+echo "Please Wait..."
+apt-get update >/dev/null 2>&1
+
+#===========================================
+if test ! "$(which apt-ftparchive)"; then
+echo "installing..."
+        apt-get install apt-utils -y
+else 
+echo "install OK"
+fi
+if test ! "$(which gzip)"; then
+echo "installing..."
+        apt-get install gzip -y
+else 
+echo "install OK"
+fi
+if test ! "$(which xz)"; then
+echo "installing..."
+        apt-get install xz-utils -y
+else 
+echo "install OK"
+fi
+if test ! "$(which zstd)"; then
+echo "installing..."
+        apt-get install zstd -y
+else 
+echo "install OK"
+fi
+if test ! "$(which bzip2)"; then
+echo "installing..."
+        apt-get install bzip2 -y
+else 
+echo "install OK"
+fi
+#===========================================
+rm {Packages{,.xz,.gz,.bz2,.zst},Release{,.gpg}} 2> /dev/null
+
+apt-ftparchive packages ./debs > Packages
+apt-ftparchive release -c ./assets/repo/repo.conf . > Release
+
+bzip2 -c9 Packages > Packages.bz2
+zstd -c19 Packages > Packages.zst
+xz    -c9 Packages > Packages.xz
+gzip  -c9 Packages > Packages.gz
+
+echo "Repository Updated, thanks for using repo.me!"
+echo "Original script by Twitter @truesyns"
+#===========================================
+exit 0
